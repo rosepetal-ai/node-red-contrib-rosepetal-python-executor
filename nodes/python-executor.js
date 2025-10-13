@@ -311,13 +311,13 @@ module.exports = function(RED) {
      * Execute Python code in HOT mode (persistent worker)
      */
     function executeHotMode(node, msg, send, done) {
-        // Show running status
-        setHotStatus(node, "blue", "dot", "hot: running");
-        logHotStats(node, 'Dispatching message to hot worker');
-
         const startTime = Date.now();
         let timedOut = false;
         let cancelHandle = null;
+        const updateRunningStatus = () => {
+            setHotStatus(node, "blue", "dot", "hot: running");
+            logHotStats(node, 'Dispatching message to hot worker');
+        };
 
         // Set timeout
         const timeoutId = setTimeout(() => {
@@ -333,7 +333,7 @@ module.exports = function(RED) {
         }, node.timeout);
 
         // Execute on worker pool
-        cancelHandle = node.workerPool.execute(msg, node.func, (error, result) => {
+        const executionCallback = (error, result) => {
             if (timedOut) {
                 return;
             }
@@ -364,7 +364,19 @@ module.exports = function(RED) {
             }, 3000);
 
             done();
-            }, { nodeId: node.workerPoolKey });
+        };
+
+        try {
+            cancelHandle = node.workerPool.execute(msg, node.func, executionCallback, { nodeId: node.workerPoolKey });
+        } catch (dispatchError) {
+            clearTimeout(timeoutId);
+            const errObj = dispatchError instanceof Error ? dispatchError : new Error(String(dispatchError));
+            setHotStatus(node, "red", "ring", "hot: dispatch failed");
+            done(errObj);
+            return;
+        }
+
+        updateRunningStatus();
 
         if (!cancelHandle || typeof cancelHandle.cancel !== 'function') {
             cancelHandle = null;

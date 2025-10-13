@@ -41,4 +41,4 @@ Bring Python into your Node-RED flows with a node that feels familiar, stays fri
 - **Fast:** Hot mode cuts response time dramatically for repeat work.
 - **Clear:** Status messages and notifications help you see what is working and what needs attention.
 
-Enjoy mixing Python logic into your Node-RED projects without extra fuss. When you are ready for more performance, flip on Hot Mode and keep building.***
+Enjoy mixing Python logic into your Node-RED projects without extra fuss. When you are ready for more performance, flip on Hot Mode and keep building.

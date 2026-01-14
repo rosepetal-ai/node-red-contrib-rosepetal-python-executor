@@ -123,6 +123,40 @@
                     button.prop('disabled', false);
                 });
             });
+
+            // Expand button handler for fullscreen editing
+            var expandButtonClickHandler = function(editor, stateId) {
+                return function(e) {
+                    e.preventDefault();
+                    var value = editor.getValue();
+                    editor.saveView();
+                    RED.editor.editJavaScript({
+                        value: value,
+                        width: "Infinity",
+                        stateId: stateId,
+                        mode: "ace/mode/python",
+                        focus: true,
+                        cancel: function() {
+                            setTimeout(function() { editor.focus(); }, 250);
+                        },
+                        complete: function(v, cursor) {
+                            editor.setValue(v, -1);
+                            setTimeout(function() {
+                                editor.restoreView();
+                                editor.focus();
+                            }, 250);
+                        }
+                    });
+                };
+            };
+
+            // Bind expand buttons
+            $("#node-func-expand").on("click", expandButtonClickHandler(this.editor, "python-executor-func"));
+            $("#node-preload-expand").on("click", expandButtonClickHandler(this.preloadEditor, "python-executor-preload"));
+
+            // Add tooltips to expand buttons
+            RED.popover.tooltip($("#node-func-expand"), RED._("node-red:common.label.expand"));
+            RED.popover.tooltip($("#node-preload-expand"), RED._("node-red:common.label.expand"));
         },
         oneditsave: function() {
             // Save the editor content
@@ -154,8 +188,8 @@
             });
             height -= totalMargins;
 
-            var preloadHeight = Math.max(150, Math.floor(height * 0.35));
-            var funcHeight = Math.max(200, height - preloadHeight);
+            var preloadHeight = Math.max(180, Math.floor(height * 0.25));
+            var funcHeight = Math.max(300, height - preloadHeight);
 
             $("#node-input-preloadImports-editor").css("height", preloadHeight + "px");
             $("#node-input-func-editor").css("height", funcHeight + "px");
@@ -206,8 +240,13 @@
         <label for="node-input-preloadImports"><i class="fa fa-download"></i> Preload Imports</label>
         <input type="hidden" id="node-input-preloadImports">
     </div>
-    <div class="form-row node-text-editor-row" id="preload-editor-row">
-        <div style="height: 180px; min-height: 150px;" class="node-text-editor" id="node-input-preloadImports-editor"></div>
+    <div class="form-row node-text-editor-row" id="preload-editor-row" style="position:relative">
+        <div style="height: 220px; min-height: 180px;" class="node-text-editor" id="node-input-preloadImports-editor"></div>
+        <div style="position: absolute; left:0; bottom: calc(100% - 20px); z-index: 10;">
+            <button type="button" id="node-preload-expand" class="red-ui-button red-ui-button-small">
+                <i class="fa fa-expand"></i>
+            </button>
+        </div>
     </div>
     <div class="form-tips" id="preload-tip" style="margin-top: -10px; margin-bottom: 10px;">
         These statements run once when each hot worker starts, so heavy libraries are ready before the first message.
@@ -216,8 +255,13 @@
         <label for="node-input-func"><i class="fa fa-file-code-o"></i> Python Code</label>
         <input type="hidden" id="node-input-func" autofocus="autofocus">
     </div>
-    <div class="form-row node-text-editor-row">
-        <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-func-editor"></div>
+    <div class="form-row node-text-editor-row" style="position:relative">
+        <div style="height: 400px; min-height:250px;" class="node-text-editor" id="node-input-func-editor"></div>
+        <div style="position: absolute; left:0; bottom: calc(100% - 20px); z-index: 10;">
+            <button type="button" id="node-func-expand" class="red-ui-button red-ui-button-small">
+                <i class="fa fa-expand"></i>
+            </button>
+        </div>
     </div>
 </script>
 

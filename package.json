@@ -1,5 +1,5 @@
 {
-  "name": "node-red-contrib-python-executor",
+  "name": "@rosepetal/node-red-contrib-python-executor",
   "version": "1.0.1",
   "description": "A Node-RED node for executing Python code, similar to the function node but for Python",
   "main": "nodes/python-executor.js",
